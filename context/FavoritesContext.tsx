@@ -1,6 +1,6 @@
 // Avoid prop drilling to MovieModal and FavoritesPanel
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import type { Movie, Favorite } from "@/types";
 
 type FavoritesContextType = {
@@ -16,21 +16,16 @@ type FavoritesContextType = {
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-  const [favorites, setFavorites] = useState<Record<number, Favorite>>({});
-  const [loaded, setLoaded] = useState(false);
-
-  // Read from localStorage after mount
-  useEffect(() => {
+  const [favorites, setFavorites] = useState<Record<number, Favorite>>(() => {
+    if (typeof window === "undefined") return {};
     const stored = localStorage.getItem("favorites");
-    if (stored) setFavorites(JSON.parse(stored));
-    setLoaded(true);
-  }, []);
+    return stored ? JSON.parse(stored) : {};
+  });
 
   // Write to localStorage when favorite changes or loaded
   useEffect(() => {
-    if (!loaded) return;
     localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites, loaded]);
+  }, [favorites]);
 
   const addFavorite = (movie: Movie) => {
     setFavorites((prev) => ({
