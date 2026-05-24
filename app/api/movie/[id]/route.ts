@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 // Identifies a specific movie, ID belongs in the path
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params;
+  const { id } = await params;
   if (!id)
     return NextResponse.json({ error: "Missing movie id" }, { status: 400 });
 
